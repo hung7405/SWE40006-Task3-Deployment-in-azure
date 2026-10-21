@@ -1,0 +1,117 @@
+@page
+@model TasksModel
+@{
+    ViewData["Title"] = "Deployment Checklist";
+    var done = Model.Tasks.Count(t => t.Status == DeploymentDashboard.Models.ChecklistStatus.Done);
+    var total = Model.Tasks.Count;
+    var percent = total == 0 ? 0 : (int)Math.Round(done * 100.0 / total);
+}
+
+<section class="page-head">
+    <div>
+        <h1>Deployment checklist</h1>
+        <p class="lead">Tasks are stored in the App Service worker process. Adding or advancing a task exercises validated POST handlers.</p>
+    </div>
+    <div class="progress-wrap">
+        <div class="progress-label"><span>@done / @total complete</span><span>@percent%</span></div>
+        <div class="progress"><div class="progress-bar" style="width:@(percent)%"></div></div>
+    </div>
+</section>
+
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <div class="alert">@Model.Message</div>
+}
+
+<section class="grid grid-2">
+    <article class="card">
+        <h2>Add a task</h2>
+        <form method="post" asp-page-handler="Add" class="form">
+            <div asp-validation-summary="ModelOnly" class="validation"></div>
+
+            <label asp-for="Input.Title"></label>
+            <input asp-for="Input.Title" placeholder="e.g. Configure custom domain" />
+            <span asp-validation-for="Input.Title" class="validation"></span>
+
+            <label asp-for="Input.Notes"></label>
+            <textarea asp-for="Input.Notes" rows="3" placeholder="Optional notes, max 240 characters"></textarea>
+            <span asp-validation-for="Input.Notes" class="validation"></span>
+
+            <label asp-for="Input.Owner"></label>
+            <input asp-for="Input.Owner" />
+
+            <button type="submit" class="btn btn-primary">Add task</button>
+        </form>
+    </article>
+
+    <article class="card">
+        <h2>How the state is handled</h2>
+        <p>
+            The checklist lives in a singleton <span class="mono">ITaskStore</span> implemented with a
+            <span class="mono">ConcurrentDictionary</span>. Each POST is bound to a model, verified with data
+            annotations and validated before the store is touched, which is the same pattern used for
+            database-backed pages &mdash; only the storage layer differs.
+        </p>
+        <p>
+            Because no state is written to disk, the app is safe to run on a shared App Service plan and
+            automatically resets to the seeded checklist when the worker recycles.
+        </p>
+        <ul class="feature-list compact">
+            <li>GET renders the current snapshot.</li>
+            <li>POST <span class="mono">?handler=Add</span> validates and inserts.</li>
+            <li>POST <span class="mono">?handler=Advance</span> cycles Planned &rarr; In progress &rarr; Done.</li>
+            <li>POST <span class="mono">?handler=Remove</span> deletes an item.</li>
+        </ul>
+    </article>
+</section>
+
+<section class="card">
+    <h2>Current tasks</h2>
+    @if (Model.Tasks.Count == 0)
+    {
+        <p class="muted">No tasks yet. Add one above.</p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Task</th>
+                    <th>Owner</th>
+                    <th>Status</th>
+                    <th>Created (UTC)</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var task in Model.Tasks)
+            {
+                <tr>
+                    <td>
+                        <div class="task-title">@task.Title</div>
+                        @if (!string.IsNullOrWhiteSpace(task.Notes))
+                        {
+                            <div class="task-notes">@task.Notes</div>
+                        }
+                    </td>
+                    <td>@task.Owner</td>
+                    <td><span class="badge badge-@task.Status.ToString().ToLowerInvariant()">@task.Status</span></td>
+                    <td class="mono small">@task.CreatedUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td class="actions">
+                        <form method="post" asp-page-handler="Advance" asp-route-id="@task.Id">
+                            <button type="submit" class="btn btn-small">Advance</button>
+                        </form>
+                        <form method="post" asp-page-handler="Remove" asp-route-id="@task.Id">
+                            <button type="submit" class="btn btn-small btn-danger">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

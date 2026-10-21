@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>DeploymentDashboard</RootNamespace>
+    <AssemblyName>DeploymentDashboard</AssemblyName>
+    <Version>1.0.0</Version>
+    <Authors>SWE40006 Student</Authors>
+    <Description>ASP.NET Core deployment evidence dashboard for SWE40006 Deployment Portfolio Task 3.</Description>
+  </PropertyGroup>
+
+</Project>

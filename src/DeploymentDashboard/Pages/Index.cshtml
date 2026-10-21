@@ -1,0 +1,99 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Deployment Dashboard";
+    var info = Model.Info;
+}
+
+<section class="hero">
+    <div class="hero-text">
+        <span class="pill">SWE40006 &middot; Deployment Portfolio Task 3</span>
+        <h1>@info.ApplicationName</h1>
+        <p class="lead">
+            A live ASP.NET Core web application running on Microsoft Azure App Service.
+            Everything on this page is generated at request time from the running process,
+            so it doubles as proof that the deployment is healthy.
+        </p>
+        <div class="hero-actions">
+            <a class="btn btn-primary" asp-page="/Tasks">Open deployment checklist</a>
+            <a class="btn btn-ghost" href="/api/deployment" target="_blank" rel="noopener">View JSON API</a>
+            <a class="btn btn-ghost" href="/health" target="_blank" rel="noopener">Health probe</a>
+        </div>
+    </div>
+    <div class="hero-card">
+        <div class="status-dot"></div>
+        <div>
+            <div class="hero-card-label">Live status</div>
+            <div class="hero-card-value">Healthy &middot; responding</div>
+            <div class="hero-card-meta">@info.ServerTimeUtc.ToString("yyyy-MM-dd HH:mm:ss") UTC</div>
+        </div>
+    </div>
+</section>
+
+<section class="stats">
+    <div class="stat">
+        <span class="stat-value">@info.Framework.Replace(".NET ", "").Split(' ')[0]</span>
+        <span class="stat-label">.NET runtime</span>
+    </div>
+    <div class="stat">
+        <span class="stat-value">@info.ProcessorCount</span>
+        <span class="stat-label">vCPU cores</span>
+    </div>
+    <div class="stat">
+        <span class="stat-value">@info.WorkingSet</span>
+        <span class="stat-label">Working set</span>
+    </div>
+    <div class="stat">
+        <span class="stat-value">@info.Uptime.ToString(@"hh\:mm\:ss")</span>
+        <span class="stat-label">Process uptime</span>
+    </div>
+</section>
+
+<section class="grid">
+    <article class="card">
+        <h2>Deployment identity</h2>
+        <dl class="kv">
+            <dt>Application</dt><dd>@info.ApplicationName</dd>
+            <dt>Version</dt><dd>@info.Version</dd>
+            <dt>Student</dt><dd>@info.StudentName (@info.StudentId)</dd>
+            <dt>Unit</dt><dd>@info.UnitCode</dd>
+            <dt>Environment</dt><dd>@info.Environment</dd>
+            <dt>Host name</dt><dd>@info.HostName</dd>
+        </dl>
+    </article>
+
+    <article class="card">
+        <h2>Azure App Service</h2>
+        <dl class="kv">
+            <dt>Site name</dt><dd>@(info.AppServiceName ?? "not running in Azure")</dd>
+            <dt>Public host</dt><dd>@(info.WebsiteHostName ?? info.HostName)</dd>
+            <dt>Region</dt><dd>@(info.RegionName ?? "n/a")</dd>
+            <dt>Slot</dt><dd>@(info.SlotName ?? "n/a")</dd>
+            <dt>Instance</dt><dd class="mono">@(info.InstanceId ?? "n/a")</dd>
+            <dt>Started (UTC)</dt><dd>@info.StartedAtUtc.ToString("yyyy-MM-dd HH:mm:ss")</dd>
+        </dl>
+    </article>
+
+    <article class="card">
+        <h2>Runtime</h2>
+        <dl class="kv">
+            <dt>Framework</dt><dd>@info.Framework</dd>
+            <dt>OS</dt><dd>@info.OperatingSystem</dd>
+            <dt>Architecture</dt><dd>@info.Architecture</dd>
+            <dt>Server time</dt><dd>@info.ServerTimeUtc.ToString("yyyy-MM-dd HH:mm:ss") UTC</dd>
+            <dt>Request id</dt><dd class="mono">@Model.RequestId</dd>
+        </dl>
+    </article>
+</section>
+
+<section class="card">
+    <h2>What this application demonstrates</h2>
+    <ul class="feature-list">
+        <li><strong>Server rendered UI</strong> &mdash; ASP.NET Core Razor Pages with strongly typed models.</li>
+        <li><strong>Dependency injection</strong> &mdash; services registered in <span class="mono">Program.cs</span>.</li>
+        <li><strong>Configuration binding</strong> &mdash; values read from <span class="mono">appsettings.json</span> and App Service application settings.</li>
+        <li><strong>Stateful interaction</strong> &mdash; validated POST handlers that mutate a task store.</li>
+        <li><strong>Observability</strong> &mdash; <span class="mono">/health</span> and <span class="mono">/api/deployment</span> machine readable endpoints.</li>
+        <li><strong>Cloud readiness</strong> &mdash; HTTPS redirection, HSTS in production and no local file writes.</li>
+    </ul>
+</section>

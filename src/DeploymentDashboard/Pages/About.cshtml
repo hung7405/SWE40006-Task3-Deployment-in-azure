@@ -1,0 +1,61 @@
+@page
+@model AboutModel
+@{
+    ViewData["Title"] = "About this deployment";
+}
+
+<section class="page-head">
+    <div>
+        <h1>About this deployment</h1>
+        <p class="lead">Context for the marker: what was built, how it was deployed, and where the source lives.</p>
+    </div>
+</section>
+
+<section class="grid grid-2">
+    <article class="card">
+        <h2>Student and unit</h2>
+        <dl class="kv">
+            <dt>Student</dt><dd>@Model.StudentName</dd>
+            <dt>Student ID</dt><dd>@Model.StudentId</dd>
+            <dt>Unit</dt><dd>SWE40006 Software Deployment and Evolution</dd>
+            <dt>Assessment</dt><dd>Deployment Portfolio Task 3</dd>
+            <dt>Level attempted</dt><dd>HD (Sub-tasks 3.1, 3.2 and 3.3)</dd>
+        </dl>
+    </article>
+
+    <article class="card">
+        <h2>Technology stack</h2>
+        <dl class="kv">
+            <dt>Language</dt><dd>C# 13</dd>
+            <dt>Framework</dt><dd>ASP.NET Core 9 (Razor Pages)</dd>
+            <dt>Hosting</dt><dd>Azure App Service &mdash; Windows, .NET 9</dd>
+            <dt>IDE</dt><dd>Visual Studio 2022</dd>
+            <dt>Source control</dt><dd>Git / GitHub</dd>
+            <dt>Second app</dt><dd>PHP 8.3 on a separate App Service</dd>
+        </dl>
+    </article>
+</section>
+
+<section class="card">
+    <h2>Deployment pipeline used</h2>
+    <ol class="steps">
+        <li><strong>Create the project</strong> &mdash; <span class="mono">dotnet new webapp -n DeploymentDashboard</span> (or <em>File &gt; New &gt; Project &gt; ASP.NET Core Web App</em>).</li>
+        <li><strong>Develop</strong> &mdash; Razor Pages, services, models and a custom stylesheet committed to Git.</li>
+        <li><strong>Publish</strong> &mdash; <em>Build &gt; Publish</em> in Visual Studio, target <em>Azure App Service (Windows)</em>, then <em>Publish</em>.</li>
+        <li><strong>Configure</strong> &mdash; application settings <span class="mono">Student:FullName</span>, <span class="mono">Student:Id</span> and <span class="mono">App:Version</span> added in the portal so no secrets sit in source.</li>
+        <li><strong>Verify</strong> &mdash; browse the public HTTPS URL, check <span class="mono">/health</span> and <span class="mono">/api/deployment</span>.</li>
+        <li><strong>Deactivate</strong> &mdash; <em>Stop</em> the App Service in the Azure portal and capture the status.</li>
+    </ol>
+</section>
+
+<section class="card">
+    <h2>Repository layout</h2>
+<pre class="code">src/
+  DeploymentDashboard/        ASP.NET Core Razor Pages web application (Task 3.2 / 3.3)
+    Models/                   DeploymentInfo, DeploymentTask
+    Services/                 DeploymentInfoProvider, InMemoryTaskStore
+    Pages/                    Index, Tasks, About, Error
+    wwwroot/css/site.css      Custom theme
+  DeploymentConsole/          C# console application (Task 3.2 evidence)
+  php-webapp/                 PHP 8 web application (Task 3.3)</pre>
+</section>

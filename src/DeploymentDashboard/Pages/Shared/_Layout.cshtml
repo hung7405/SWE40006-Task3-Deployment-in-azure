@@ -1,0 +1,55 @@
+﻿@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@{
+    var studentName = Configuration["Student:FullName"] ?? "Student Name";
+    var studentId = Configuration["Student:Id"] ?? "Student ID";
+    var appName = Configuration["App:Name"] ?? "CloudDeploy Dashboard";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] &middot; @appName</title>
+    <meta name="description" content="ASP.NET Core application deployed to Azure App Service for SWE40006 Deployment Portfolio Task 3." />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="topbar">
+        <div class="container topbar-inner">
+            <a class="brand" asp-page="/Index">
+                <span class="brand-mark">CD</span>
+                <span class="brand-text">
+                    <strong>@appName</strong>
+                    <small>SWE40006 &middot; Task 3</small>
+                </span>
+            </a>
+            <nav class="nav">
+                <a asp-page="/Index">Dashboard</a>
+                <a asp-page="/Tasks">Checklist</a>
+                <a asp-page="/About">About</a>
+                <a class="nav-cta" href="https://portal.azure.com" target="_blank" rel="noopener">Azure Portal &#8599;</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container main">
+        @RenderBody()
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-inner">
+            <div>
+                <strong>@studentName</strong> &middot; @studentId<br />
+                <span class="muted">SWE40006 Software Deployment and Evolution &middot; Deployment Portfolio Task 3</span>
+            </div>
+            <div class="muted small">
+                ASP.NET Core 9 Razor Pages &middot; Microsoft Azure App Service<br />
+                &copy; @DateTime.UtcNow.Year
+            </div>
+        </div>
+    </footer>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

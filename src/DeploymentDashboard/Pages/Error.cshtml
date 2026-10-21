@@ -1,0 +1,24 @@
+﻿@page
+@model ErrorModel
+@{
+    ViewData["Title"] = "Something went wrong";
+}
+
+<section class="page-head">
+    <div>
+        <h1>Something went wrong</h1>
+        <p class="lead">The request could not be processed. The error has been logged by the App Service.</p>
+    </div>
+</section>
+
+<section class="card">
+    @if (Model.ShowRequestId)
+    {
+        <p><strong>Request ID:</strong> <span class="mono">@Model.RequestId</span></p>
+    }
+    <p class="muted">
+        Detailed diagnostics are only shown when the application runs in the Development environment.
+        In production the application returns this safe page so that internal details are never exposed.
+    </p>
+    <p><a class="btn btn-primary" asp-page="/Index">Back to the dashboard</a></p>
+</section>

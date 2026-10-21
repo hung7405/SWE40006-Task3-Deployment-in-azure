@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>deployctl</AssemblyName>
+    <RootNamespace>DeploymentConsole</RootNamespace>
+    <Version>1.0.0</Version>
+    <Description>Release pre-flight checker for the SWE40006 Task 3 Azure deployment.</Description>
+  </PropertyGroup>
+
+</Project>

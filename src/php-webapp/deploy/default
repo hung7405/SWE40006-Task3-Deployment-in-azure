@@ -1,0 +1,67 @@
+# Custom nginx site configuration for the CloudDeploy PHP app.
+#
+# WHY THIS FILE EXISTS
+# The prebuilt App Service PHP image ships a site config that serves "/" through
+# index.php and returns real files as static content, but it has no `try_files`
+# fallback. Any extensionless route (/health, /api/info, /validate, /about) is
+# therefore answered by nginx itself with "404 Not Found", never reaching the
+# front controller.
+#
+# The platform's config lives at /etc/nginx/sites-available/default and is
+# regenerated on every container start, so editing it in place does not survive
+# a restart. The supported approach (Microsoft Learn, "Configure a PHP App -
+# Change the site root") is to ship this file and copy it into place from a
+# startup command:
+#
+#   cp /home/site/wwwroot/default /etc/nginx/sites-available/default && service nginx reload
+#
+# script: 01-create-resources.ps1 / 03-deploy-php.ps1
+
+server {
+    listen 8080;
+    listen [::]:8080;
+
+    root /home/site/wwwroot;
+    index index.php index.html index.htm;
+    port_in_redirect off;
+
+    # Front controller: any path that is not a real file is handled by index.php.
+    location / {
+        try_files $uri $uri/ /index.php?$args;
+    }
+
+    # This file must never be downloadable.
+    location = /default {
+        deny all;
+        return 404;
+    }
+
+    location = /50x.html {
+        root /html/;
+    }
+
+    # Never expose dot files (.git, .env, ...).
+    location ~ /\.(?!well-known) {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+
+    location ~ [^/]\.php(/|$) {
+        fastcgi_split_path_info ^(.+?\.php)(|/.*)$;
+        fastcgi_pass 127.0.0.1:9000;
+        include fastcgi_params;
+        fastcgi_param HTTP_PROXY "";
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        fastcgi_param QUERY_STRING $query_string;
+        fastcgi_intercept_errors on;
+        fastcgi_connect_timeout 300;
+        fastcgi_send_timeout 3600;
+        fastcgi_read_timeout 3600;
+        fastcgi_buffer_size 128k;
+        fastcgi_buffers 4 256k;
+        fastcgi_busy_buffers_size 256k;
+        fastcgi_temp_file_write_size 256k;
+    }
+}

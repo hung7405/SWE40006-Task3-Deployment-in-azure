@@ -1,0 +1,98 @@
+name: Deploy PHP app to Azure App Service
+
+# Continuous deployment for the PHP application (Task 3.3).
+# The package contains only runtime files; tests and the development router are
+# not published. The custom nginx configuration ships at the package root so the
+# App Service startup command can copy it into place on every container start.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/php-webapp/**'
+      - '.github/workflows/deploy-php.yml'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AZURE_RESOURCE_GROUP: rg-swe40006-task3
+  AZURE_WEBAPP_NAME: phpdeploy-swe40006
+
+jobs:
+  test-package-deploy:
+    name: Test, package and deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, json, openssl
+          coverage: none
+
+      - name: Syntax check every PHP file
+        run: |
+          find src/php-webapp -name '*.php' -print0 \
+            | xargs -0 -n1 -P4 php -l
+
+      - name: Run the dependency-free test suite
+        run: php src/php-webapp/tests/run-tests.php
+
+      - name: Package runtime files
+        run: |
+          mkdir -p "${{ runner.temp }}/php"
+          cp src/php-webapp/index.php      "${{ runner.temp }}/php/"
+          cp src/php-webapp/bootstrap.php  "${{ runner.temp }}/php/"
+          cp -r src/php-webapp/src        "${{ runner.temp }}/php/"
+          cp -r src/php-webapp/templates  "${{ runner.temp }}/php/"
+          cp -r src/php-webapp/assets     "${{ runner.temp }}/php/"
+          cp src/php-webapp/deploy/default "${{ runner.temp }}/php/"
+          cd "${{ runner.temp }}/php"
+          zip -r "${{ runner.temp }}/php.zip" .
+          ls -lh "${{ runner.temp }}/php.zip"
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to App Service
+        run: >
+          az webapp deploy
+          --resource-group "$AZURE_RESOURCE_GROUP"
+          --name "$AZURE_WEBAPP_NAME"
+          --src-path "${{ runner.temp }}/php.zip"
+          --type zip
+
+      - name: Smoke test the public endpoint
+        run: |
+          url="https://${AZURE_WEBAPP_NAME}.azurewebsites.net/health"
+          for attempt in 1 2 3 4 5 6; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "$url")
+            echo "attempt $attempt: HTTP $code"
+            if [ "$code" = "200" ]; then exit 0; fi
+            sleep 10
+          done
+          echo "Health check did not return 200 in time"
+          exit 1
+
+      - name: Show the deployed manifest verdict
+        run: |
+          curl -s -X POST "https://${AZURE_WEBAPP_NAME}.azurewebsites.net/validate" \
+            -H 'Content-Type: application/json' \
+            --data-binary @- <<'JSON'
+          {"appName":"clouddeploy-swe40006","runtime":"DOTNETCORE:9.0","os":"linux",
+           "region":"australiaeast","sku":"F1","healthCheckPath":"/health",
+           "httpsOnly":true,"minTlsVersion":"1.2","alwaysOn":false,
+           "appSettings":{"Student__Id":"12345678"}}
+          JSON
