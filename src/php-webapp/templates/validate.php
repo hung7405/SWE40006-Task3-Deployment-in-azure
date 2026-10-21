@@ -39,7 +39,7 @@ use CloudDeploy\Deployment\ValidationReport;
             <?= $report->count(Finding::WARN) ?> warning(s) &middot;
             <?= $report->count(Finding::FAIL) ?> blocking failure(s)
         </p>
-        <table class="table">
+        <table class="table table-result">
             <thead>
             <tr><th>Rule</th><th>Result</th><th>Finding</th><th>Remedy</th></tr>
             </thead>

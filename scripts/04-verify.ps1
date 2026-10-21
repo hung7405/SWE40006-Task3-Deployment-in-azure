@@ -26,20 +26,20 @@ Log ("PHP app   : {0}" -f $PhpUrl)
 Log ''
 
 $targets = @(
-    @{ Name = 'C#  /health';          Url = "$CsharpUrl/health" },
-    @{ Name = 'C#  /api/deployment';  Url = "$CsharpUrl/api/deployment" },
-    @{ Name = 'C#  /';                Url = "$CsharpUrl/" },
-    @{ Name = 'PHP /health';          Url = "$PhpUrl/health" },
-    @{ Name = 'PHP /api/info';        Url = "$PhpUrl/api/info" },
-    @{ Name = 'PHP /';                Url = "$PhpUrl/" },
-    @{ Name = 'PHP /validate';        Url = "$PhpUrl/validate" },
-    @{ Name = 'PHP /validate (API)';  Url = "$PhpUrl/validate" }
+    @{ Name = 'C#  /health';          Method = 'GET';  Url = "$CsharpUrl/health" },
+    @{ Name = 'C#  /api/deployment';  Method = 'GET';  Url = "$CsharpUrl/api/deployment" },
+    @{ Name = 'C#  /';                Method = 'GET';  Url = "$CsharpUrl/" },
+    @{ Name = 'PHP /health';          Method = 'GET';  Url = "$PhpUrl/health" },
+    @{ Name = 'PHP /api/info';        Method = 'GET';  Url = "$PhpUrl/api/info" },
+    @{ Name = 'PHP /';                Method = 'GET';  Url = "$PhpUrl/" },
+    @{ Name = 'PHP /validate';        Method = 'GET';  Url = "$PhpUrl/validate" },
+    @{ Name = 'PHP /validate (API)';  Method = 'POST'; Url = "$PhpUrl/validate" }
 )
 
 foreach ($target in $targets) {
     $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
     try {
-        if ($target.Name -like '*API*') {
+        if ($target.Method -eq 'POST') {
             $body = '{"appName":"clouddeploy-swe40006","runtime":"DOTNETCORE:9.0","os":"linux","region":"australiaeast","sku":"F1","healthCheckPath":"/health","httpsOnly":true,"minTlsVersion":"1.2","alwaysOn":false,"appSettings":{"Student__Id":"12345678"}}'
             $response = Invoke-WebRequest -Uri $target.Url -Method Post -ContentType 'application/json' -Body $body -UseBasicParsing -TimeoutSec 90
         }

@@ -21,8 +21,8 @@ $PhpAppName = 'phpdeploy-swe40006'
 # Shown on both web applications. Replace with your own details, or edit the
 # values in the portal later (Configuration -> Application settings) and take
 # a screenshot of that screen as evidence.
-$StudentName = 'Your Full Name'
-$StudentId   = 'Your Student ID'
+$StudentName = 'Truong Viet Hung'
+$StudentId   = '104775470'
 $UnitCode    = 'SWE40006'
 $AppVersion  = '1.0.0'
 
@@ -33,3 +33,4 @@ $CsharpUrl = "https://$AppName.azurewebsites.net"
 $PhpUrl    = "https://$PhpAppName.azurewebsites.net"
 $RepoRoot  = Split-Path -Parent $PSScriptRoot
 $Artifacts = Join-Path $RepoRoot 'artifacts'
+
