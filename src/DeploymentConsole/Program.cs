@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -26,7 +26,7 @@ internal static class Program
 
         Banner(options);
 
-        var checks = new List<Check>
+        var checks = new List<CheckResult>
         {
             CheckRuntime(),
             CheckEnvironment(),
@@ -76,7 +76,7 @@ internal static class Program
         Console.WriteLine();
     }
 
-    private static void PrintTable(IReadOnlyList<Check> checks)
+    private static void PrintTable(IReadOnlyList<CheckResult> checks)
     {
         Console.WriteLine($"  {"#",-3}{"RESULT",-9}{"CHECK",-30}DETAIL");
         Console.WriteLine($"  {new string('─', 3)}{new string('─', 9)}{new string('─', 30)}{new string('─', 34)}");
@@ -116,27 +116,27 @@ internal static class Program
 
     // ------------------------------------------------------------------ checks
 
-    private static Check CheckRuntime()
+    private static CheckResult CheckRuntime()
     {
         var version = Environment.Version;
-        return new Check(
+        return new CheckResult(
             "Runtime supported",
             version.Major >= 8,
             $".NET {version} on {RuntimeInformation.ProcessArchitecture}");
     }
 
-    private static Check CheckEnvironment()
+    private static CheckResult CheckEnvironment()
     {
         var machine = Environment.MachineName;
-        return new Check("Build host identified", true, $"{machine} / {RuntimeInformation.OSDescription.Split('(')[0].Trim()}");
+        return new CheckResult("Build host identified", true, $"{machine} / {RuntimeInformation.OSDescription.Split('(')[0].Trim()}");
     }
 
-    private static Check Check(string name, string detail, bool passed) => new(name, passed, detail);
+    private static CheckResult Check(string name, string detail, bool passed) => new(name, passed, detail);
 
-    private static Check CheckAzureSettings(Options options)
+    private static CheckResult CheckAzureSettings(Options options)
     {
         var hasSite = !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME"));
-        return new Check(
+        return new CheckResult(
             "App Service settings",
             hasSite,
             hasSite
@@ -147,7 +147,7 @@ internal static class Program
 
     // ------------------------------------------------------------------ types
 
-    private sealed record Check(string Name, bool Passed, string Detail, bool Optional = false);
+    private sealed record CheckResult(string Name, bool Passed, string Detail, bool Optional = false);
 
     private sealed record Options(string Path, string Target, bool ShowHelp, bool WriteReport)
     {
@@ -181,3 +181,4 @@ internal static class Program
         }
     }
 }
+
