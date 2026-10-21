@@ -25,7 +25,6 @@ jobs:
   test-package-deploy:
     name: Test, package and deploy
     runs-on: ubuntu-latest
-    environment: production
 
     steps:
       - name: Checkout
@@ -90,9 +89,4 @@ jobs:
         run: |
           curl -s -X POST "https://${AZURE_WEBAPP_NAME}.azurewebsites.net/validate" \
             -H 'Content-Type: application/json' \
-            --data-binary @- <<'JSON'
-          {"appName":"clouddeploy-swe40006","runtime":"DOTNETCORE:9.0","os":"linux",
-           "region":"australiaeast","sku":"F1","healthCheckPath":"/health",
-           "httpsOnly":true,"minTlsVersion":"1.2","alwaysOn":false,
-           "appSettings":{"Student__Id":"12345678"}}
-          JSON
+            --data '{"appName":"clouddeploy-swe40006","runtime":"DOTNETCORE:9.0","os":"linux","region":"australiaeast","sku":"F1","healthCheckPath":"/health","httpsOnly":true,"minTlsVersion":"1.2","alwaysOn":false,"appSettings":{"Student__Id":"12345678"}}'
