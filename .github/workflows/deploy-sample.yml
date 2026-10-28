@@ -1,0 +1,72 @@
+name: Deploy SampleApp to Azure App Service
+
+# Continuous deployment for the existing ASP.NET Core application (Task 3.1).
+# Uses the same OpenID Connect identity and resource group as the other apps.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/SampleApp/**'
+      - '.github/workflows/deploy-sample.yml'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AZURE_RESOURCE_GROUP: rg-swe40006-task3
+  AZURE_WEBAPP_NAME: sampleapp-swe40006
+  DOTNET_VERSION: '9.0.x'
+
+jobs:
+  build-deploy:
+    name: Build and deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Publish
+        run: dotnet publish src/SampleApp/SampleApp.csproj -c Release -o ${{ runner.temp }}/publish
+
+      - name: Package
+        run: |
+          cd "${{ runner.temp }}/publish"
+          zip -r "${{ runner.temp }}/app.zip" . -x '*.pdb'
+          ls -lh "${{ runner.temp }}/app.zip"
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to App Service
+        run: >
+          az webapp deploy
+          --resource-group "$AZURE_RESOURCE_GROUP"
+          --name "$AZURE_WEBAPP_NAME"
+          --src-path "${{ runner.temp }}/app.zip"
+          --type zip
+          --clean true
+
+      - name: Smoke test the public endpoint
+        run: |
+          url="https://${AZURE_WEBAPP_NAME}.azurewebsites.net/"
+          for attempt in 1 2 3 4 5 6; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "$url")
+            echo "attempt $attempt: HTTP $code"
+            if [ "$code" = "200" ]; then exit 0; fi
+            sleep 10
+          done
+          echo "Smoke test did not return 200 in time"
+          exit 1
