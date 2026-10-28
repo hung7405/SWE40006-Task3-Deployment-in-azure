@@ -12,7 +12,7 @@ use CloudDeploy\Deployment\SelfTest;
 ?>
 <section class="hero">
     <div>
-        <span class="pill">PHP 8 &middot; Azure App Service &middot; Task 3.3</span>
+        <span class="pill">PHP 8 &middot; Azure App Service &middot; Task 3.3 MR Dung</span>
         <h1>Deployment evidence, live from the App Service worker</h1>
         <p class="lead">
             This page is rendered by PHP <?= htmlspecialchars(PHP_VERSION, ENT_QUOTES) ?> running on Microsoft Azure.
