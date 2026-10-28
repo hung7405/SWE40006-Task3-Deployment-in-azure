@@ -41,7 +41,7 @@ $pageTitle = match ($route) {
         <a class="brand" href="/">
             <span class="brand-mark">&lt;?&gt;</span>
             <span class="brand-text">
-                <strong><?= htmlspecialchars($appName, ENT_QUOTES) ?></strong>
+                <strong>Dung &middot; <?= htmlspecialchars($appName, ENT_QUOTES) ?></strong>
                 <small><?= htmlspecialchars($unitCode, ENT_QUOTES) ?> &middot; Task 3.3</small>
             </span>
         </a>
